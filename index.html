@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Canvas from scratch</title>
+    <meta charset="utf-8">
+
+    <style>
+        svg {
+            width: 40%;
+            height:500px;
+        }
+        svg circle{
+            r:5px;
+            fill: black;
+            stroke-width:"1"; /*рамка */
+            stroke:black;  /* цвет рамки */
+
+        }
+        svg line{
+            stroke-width: 1;
+            stroke: black;
+        }
+    </style>
+</head>
+
+<body>
+<button id="clear">Clear Line</button>
+<button id="generate">Generate Line</button>
+<!--<label for="rows">rows </label><input type="number" id="rows" min="2" max="30" step="1" value="6" >-->
+<!--<label for="cols">cols </label><input type="number" id="cols" min="2" max="30" step="1" value="10">-->
+<br>
+<br>
+<br>
+<div id="field">
+
+</div>
+<script src="js/my.js"></script>
+</body>
+</html>
