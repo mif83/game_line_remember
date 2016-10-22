@@ -33,9 +33,6 @@ function generateLine(option){
   for (var i = 0; i < circle.length; i++ ){
       if (isTargeted(circle[i]) || i == circle.length-1) continue;
 
-
-
-
       if( (i+1) % option.width == 0 || (i+1) >= option.width*(option.height - 1)){
 
           if ((i+1) % option.width == 0 ){
@@ -85,13 +82,13 @@ function generateLine(option){
   }
     console.log((Date.now()- d));
     document.getElementById(option.svgId).innerHTML += str;
-/*    for (i = 0; i < circle.length; i++){
+  for (i = 0; i < circle.length; i++){
         if (!circle[i].target){
             console.log("new call");
             clearLine();
             generateLine(option);
         }
-    }*/
+    }
     console.log((Date.now()- d));
     function generateVertical(){
         circle[i+option.width].target = true;
@@ -135,7 +132,7 @@ function chekDirect(i, circle){
 }
 
 var option = {
-    width: 60,
+    width: 31,
     height: 10,
     parentContainer: document.getElementById("field"),
     svgId: "lalala"
