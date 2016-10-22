@@ -27,88 +27,91 @@ function createField(option){
 };
 function generateLine(option){
     var str = '',
-        circle = document.getElementById(option.svgId).querySelectorAll("circle"),
-        d = Date.now();
+       // circle = document.getElementById(option.svgId).querySelectorAll("circle"),
+        d = Date.now(),
+        length = option.width*option.height,
+        arrPointTargeted = [];
 
-  for (var i = 0; i < circle.length; i++ ){
-      if (isTargeted(circle[i]) || i == circle.length-1) continue;
+
+  for (var i = 0; i < length; i++ ){
+      var obj ={};
+      if (arrPointTargeted[i] || i == length-1) continue;
 
       if( (i+1) % option.width == 0 || (i+1) >= option.width*(option.height - 1)){
 
           if ((i+1) % option.width == 0 ){
-              str += "<line x1='"+ parseFloat(circle[i].attributes.cx.value)+"' " +
-                  "y1='" +parseFloat(circle[i].attributes.cy.value)+ "'";
-              circle[i].target = true;
-              str += generateVertical();
+              obj.iStart = i;
+              arrPointTargeted[i] = true;
+              obj.iEnd = generateVertical();
           } else {
-              if(isTargeted(circle[i+1])){
+              if(arrPointTargeted[i+1]){
                   console.log("target next element");
                   continue;
               }
-              str += "<line x1='"+ parseFloat(circle[i].attributes.cx.value)+"' " +
-                  "y1='" +parseFloat(circle[i].attributes.cy.value)+ "'";
-              circle[i].target = true;
-              str += generateHorizontal();
+              obj.iStart = i;
+              arrPointTargeted[i] = true;
+              obj.iEnd = generateHorizontal();
           }
       } else {
-          str += "<line x1='"+ parseFloat(circle[i].attributes.cx.value)+"' " +
-              "y1='" +parseFloat(circle[i].attributes.cy.value)+ "'";
-          circle[i].target = true;
+          obj.iStart = i;
+          arrPointTargeted[i] = true;
           if (choiceDirect()){
               //vertical
               //проверяем предпоследний ряд на правильность генерирования, мы не можем генерировать линию вниз,
               // если внизу нечетное количество незаполненых элементов
               if (i > (option.width*(option.height-2)-1) && i < (option.width*(option.height-1) -1) ){
-                  if (chekDirect(i, circle)){
-                      str += generateVertical();
+                  if (chekDirect(i, arrPointTargeted)){
+                      obj.iEnd = generateVertical();
                   } else{
-                      str += generateHorizontal();
+                      obj.iEnd = generateHorizontal();
                   }
               //    console.log("предпоследний ряд");
               } else {
-                  str += generateVertical();
+                  obj.iEnd = generateVertical();
               }
 
           } else {
               //horizontal
-              if (circle[i+1].target == true){
-                  str += generateVertical();
+              if ( arrPointTargeted[i+1] == true){
+                  obj.iEnd = generateVertical();
               } else {
-                  str += generateHorizontal();
+                  obj.iEnd = generateHorizontal();
               }
           }
       }
-
+      arrLines.push(obj);
   }
-    console.log((Date.now()- d));
-    document.getElementById(option.svgId).innerHTML += str;
-  for (i = 0; i < circle.length; i++){
-        if (!circle[i].target){
+  //  console.log((Date.now()- d));
+  //  document.getElementById(option.svgId).innerHTML += str;
+  for (i = 0; i < length; i++){
+        if (!arrPointTargeted[i]){
             console.log("new call");
-            clearLine();
+            arrPointTargeted.length = 0;
+            arrLines.length = 0;
             generateLine(option);
         }
     }
     console.log((Date.now()- d));
+
     function generateVertical(){
-        circle[i+option.width].target = true;
-        return "x2='"+ parseFloat(circle[i+option.width].attributes.cx.value)+"' " +
-            "y2='"+ parseFloat(circle[i+option.width].attributes.cy.value)+"' />";
-    }
-    function generateHorizontal(){
-        circle[i+1].target = true;
-        return "x2='"+ parseFloat(circle[i+1].attributes.cx.value)+"' " +
-            "y2='"+ parseFloat(circle[i+1].attributes.cy.value)+"' />";
+        arrPointTargeted[i+option.width] = true;
+        return i+option.width;
     }
 
+    function generateHorizontal(){
+        arrPointTargeted[i+1] = true;
+        return ++i;
+    }
+    console.log(JSON.stringify(arrLines));
+    return arrLines;
 };
 function choiceDirect(){
     //return 1 = vertical, 0 = horizontal;
     return Math.round (Math.random());
 };
-function isTargeted(elem){
+/*function isTargeted(elem){
     return elem.target;
-}
+}*/
 function clearLine(){
     var p = document.getElementById(option.svgId),
         lines = p.querySelectorAll("line");
@@ -120,25 +123,40 @@ function clearLine(){
 function clearField(){
     option.parentContainer.innerHTML ="";
 }
-function chekDirect(i, circle){
+function chekDirect(i, arrPointTargeted){
     var count = 0,
         downElemIndex = i+option.width-1;
-    while(!circle[downElemIndex].target || count > option.width){
+    while(!arrPointTargeted[downElemIndex] || count > option.width){
         count++;
         downElemIndex--;
     }
 
     return count % 2 === 0 ? true : false;
 }
+function showLines(arrLines){
+    var str = "",
+        circle = document.getElementById(option.svgId).querySelectorAll("circle");
+    for (var i = 0; i < circle.length; i++){
+        str += "<line x1='"+ parseFloat(circle[arrLines[i].iStart].attributes.cx.value)+"' " +
+            "y1='" +parseFloat(circle[arrLines[i].iStart].attributes.cy.value)+ "'" +
+             "x2='"+ parseFloat(circle[arrLines[i].iEnd].attributes.cx.value)+"' " +
+            "y2='"+ parseFloat([arrLines[i].iEnd].attributes.cy.value)+"' />";
+    }
+    document.getElementById(option.svgId).innerHTML += str;
+}
 
 var option = {
-    width: 31,
-    height: 10,
+    width: 10,
+    height: 5,
     parentContainer: document.getElementById("field"),
     svgId: "lalala"
-};
+},
+    arrLines = [];
 document.getElementById("clear").addEventListener("click", clearLine);
-document.getElementById("generate").addEventListener("click", function(){generateLine(option)});
+document.getElementById("generate").addEventListener("click", function(){
+    generateLine(option);
+    showLines(arrLines);
+});
 /*document.getElementById("rows").addEventListener("change", function(e){
     option.height = e.target.value;
     clearField();
