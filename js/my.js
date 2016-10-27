@@ -3,8 +3,8 @@
  */
 
 /***************
-* view
-***************/
+ * view
+ ***************/
 function createField(option){
     console.log(option);
     var option = option || {},
@@ -55,9 +55,20 @@ function showLines(arrLines){
     }
     document.getElementById(option.svgId).innerHTML += str;
 }
+function drowLine(startX, startY){
+    var line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", startX);
+    line.setAttribute("y1", startY);
+    line.setAttribute("x2", startX);
+    line.setAttribute("y2", startY);
+    return document.getElementById(option.svgId).appendChild(line);
+}
 /***************
-* model
-***************/
+ * end view
+ ***************/
+/***************
+ * model
+ ***************/
 function generateLine(option){
     var str = '',
         d = Date.now(),
@@ -150,8 +161,39 @@ function chekDirect(i, arrPointTargeted){
     return count % 2 === 0;
 }
 /***************
-* controller
-***************/
+ * end model
+ ***************/
+/***************
+ * controller
+ ***************/
+function getCoordsLine(e, that){
+    var arrLinesUser = [],
+        obj = {},
+        startX,
+        startY;
+    console.log(that);
+    startX = e.target.attributes.cx.value;
+    startY = e.target.attributes.cy.value;
+    var line = drowLine(startX, startY);
+
+    function moveAt(e, that) {
+    //    console.log(that);
+   //     console.log(e.pageX +":"+ e.pageY);
+    //    console.log(that.clientLeft +":"+ that.clientTop);
+        line.setAttribute("x2", + e.pageX - that.getBoundingClientRect().left);
+        line.setAttribute("y2", +e.pageY - that.getBoundingClientRect().top);
+    }
+    that.onmousemove = function(e) {
+        moveAt(e, that);
+    }
+
+    // 4. отследить окончание переноса
+    line.onmouseup = function() {
+        that.onmousemove = null;
+        that.onmouseup = null;
+    }
+};
+
 document.getElementById("clear").addEventListener("click", clearLine);
 document.getElementById("generate").addEventListener("click", function(){
     generateLine(option);
@@ -168,21 +210,28 @@ document.getElementById("cols").addEventListener("change", function(e){
     clearField();
     createField(option);
 });
-
+document.getElementById("field").addEventListener("mousedown", function(e){
+   // console.log(this);
+    if(e.target.tagName !== "circle")return;
+    getCoordsLine(e, this);
+});
 /***************
-* data
-***************/
+ * end controller
+ ***************/
+/***************
+ * data
+ ***************/
 
 var option = {
-    width: 10,
-    height: 5,
-    parentContainer: document.getElementById("field"),
-    svgId: "lalala"
+        width: 10,
+        height: 5,
+        parentContainer: document.getElementById("field"),
+        svgId: "lalala"
     },
-    arrLines = [];
+    arrLines = []; // будет хранить сгенерированный масив линий
 
 createField(option);
 
 /***************
-*
-***************/
+ * end data
+ ***************/
